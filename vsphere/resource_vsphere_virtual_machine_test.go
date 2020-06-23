@@ -624,24 +624,6 @@ func TestAccResourceVSphereVirtualMachine_disksKeepOnRemove(t *testing.T) {
 	})
 }
 
-func TestAccResourceVSphereVirtualMachine_cdromComputedValue(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccResourceVSphereVirtualMachinePreCheck(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
-		Steps: []resource.TestStep{
-			{
-				Config:             testAccResourceVSphereVirtualMachineConfigCdromComputedValue(),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: true,
-			},
-		},
-	})
-}
-
 func TestAccResourceVSphereVirtualMachine_cdromClientMapping(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -1740,28 +1722,6 @@ func TestAccResourceVSphereVirtualMachine_cloneWithBadTimezone(t *testing.T) {
 	})
 }
 
-func TestAccResourceVSphereVirtualMachine_cloneWithBadEagerlyScrubWithLinkedClone(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccResourceVSphereVirtualMachinePreCheck(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccResourceVSphereVirtualMachineConfigBadEager(),
-				ExpectError: regexp.MustCompile("must have same value for eagerly_scrub as source when using linked_clone"),
-				PlanOnly:    true,
-			},
-			{
-				Config: testAccResourcVSphereEmpty,
-				Check:  resource.ComposeTestCheckFunc(),
-			},
-		},
-	})
-}
-
 // Temporarily removed until https://github.com/hashicorp/terraform/issues/21225 is resolved.
 //func TestAccResourceVSphereVirtualMachine_cloneWithBadThinProvisionedWithLinkedClone(t *testing.T) {
 //        t.Cleanup(RunSweepers)
@@ -1955,26 +1915,6 @@ func TestAccResourceVSphereVirtualMachine_dualStackIPv4AndIPv6(t *testing.T) {
 		},
 	})
 }
-
-func TestAccResourceVSphereVirtualMachine_IPv6Only(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccResourceVSphereVirtualMachinePreCheck(t)
-		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccResourceVSphereVirtualMachineConfigIPv6Only(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckNet("fd00::2", "32", "fd00::1"),
-					resource.TestCheckResourceAttr("vsphere_virtual_machine.vm", "default_ip_address", "fd00::2"),
-				),
-			},
-		},
-	})}
 
 func TestAccResourceVSphereVirtualMachine_hostCheck(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -3744,7 +3684,7 @@ func testAccResourceVSphereVirtualMachineConfigComputedValue() string {
 resource "vsphere_virtual_machine" "vm" {
   name             = "testacc-test"
   resource_pool_id = "${vsphere_resource_pool.pool1.id}"
-  datastore_id     = "${vsphere_resource_pool.pool.id}"
+  datastore_id     = "${vsphere_nas_datastore.ds1.id}"
 
   num_cpus = 2
   memory   = 2048
@@ -7291,6 +7231,60 @@ resource "vsphere_virtual_machine" "vm" {
 		testAccResourceVSphereVirtualMachineConfigBase(),
 		vmName,
 		os.Getenv("TF_VAR_REMOTE_OVF_URL"),
+	)
+}
+
+func testAccResourceVSphereVirtualMachineDeployOvaFromUrl(vmName string) string {
+	return fmt.Sprintf(`
+variable "datacenter" {
+  type    = "string"
+  default = "%s"
+}
+variable "datastore" {
+  type    = "string"
+  default = "%s"
+}
+variable "resource_pool" {
+  type    = "string"
+  default = "%s"
+}
+variable "host" {
+  default = "%s"
+}
+data "vsphere_datacenter" "dc" {
+  name = var.datacenter
+}
+data "vsphere_datastore" "datastore" {
+  name          = var.datastore
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+data "vsphere_resource_pool" "pool" {
+  name          = var.resource_pool
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+data "vsphere_host" "host" {
+  name          = var.host
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+resource "vsphere_virtual_machine" "vm" {
+  name                       = "%s"
+  resource_pool_id           = data.vsphere_resource_pool.pool.id
+  datastore_id               = data.vsphere_datastore.datastore.id
+  datacenter_id              = data.vsphere_datacenter.dc.id
+  host_system_id             = data.vsphere_host.host.id
+  wait_for_guest_net_timeout = 0
+  wait_for_guest_ip_timeout  = 0
+  ovf_deploy {
+    remote_ovf_url = "%s"
+  }
+}
+`,
+		os.Getenv("TF_VAR_VSPHERE_DATACENTER"),
+		os.Getenv("TF_VAR_VSPHERE_DATASTORE"),
+		os.Getenv("TF_VAR_VSPHERE_RESOURCE_POOL"),
+		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST"),
+		vmName,
+		os.Getenv("TF_VAR_REMOTE_OVA_URL"),
 	)
 }
 
