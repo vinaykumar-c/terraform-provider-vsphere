@@ -480,12 +480,12 @@ func TestAccResourceVSphereVirtualMachine_highDiskUnitNumbers(t *testing.T) {
 				Config: testAccResourceVSphereVirtualMachineConfigMultiHighBus(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test.vmdk", 0, 0),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_1.vmdk", 0, 1),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_2.vmdk", 1, 0),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_3.vmdk", 1, 1),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_4.vmdk", 2, 0),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_5.vmdk", 2, 1),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test.vmdk", 0, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_1.vmdk", 0, 1),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_2.vmdk", 1, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_3.vmdk", 1, 1),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_4.vmdk", 2, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_5.vmdk", 2, 1),
 				),
 			},
 		},
@@ -528,18 +528,18 @@ func TestAccResourceVSphereVirtualMachine_highDiskUnitsToRegularSingleController
 				Config: testAccResourceVSphereVirtualMachineConfigMultiHighBus(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test.vmdk", 0, 0),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_1.vmdk", 0, 1),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_2.vmdk", 1, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test.vmdk", 0, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_1.vmdk", 0, 1),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_2.vmdk", 1, 0),
 				),
 			},
 			{
 				Config: testAccResourceVSphereVirtualMachineConfigMultiDevice(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test.vmdk", 0, 0),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_1.vmdk", 0, 1),
-					testAccResourceVSphereVirtualMachineCheckDiskBus("terraform-test_2.vmdk", 0, 2),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test.vmdk", 0, 0),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_1.vmdk", 0, 1),
+					testAccResourceVSphereVirtualMachineCheckDiskBus("testacc-test_2.vmdk", 0, 2),
 				),
 			},
 		},
@@ -2045,6 +2045,14 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionGlobalSetting(t *testing
 				Config: testAccResourceVSphereVirtualMachineConfigBase(),
 			},
 			{
+				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionGlobal(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				Check: resource.ComposeTestCheckFunc(
+					testAccResourceVSphereVirtualMachineCheckExists(true),
+					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				),
+			},
+			{
 				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionGlobal(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
@@ -2053,12 +2061,7 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionGlobalSetting(t *testing
 				),
 			},
 			{
-				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionGlobal(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
-				Check: resource.ComposeTestCheckFunc(
-					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
-					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
-				),
+				Config: testAccResourceVSphereVirtualMachineConfigBase(),
 			},
 		},
 	})
@@ -2074,6 +2077,9 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionSingleDisk(t *testing.T)
 		Providers:    testAccProviders,
 		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigBase(),
+			},
 			{
 				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionSingleDisk(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
 				Check: resource.ComposeTestCheckFunc(
@@ -2107,21 +2113,24 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionPinDatastore(t *testing.
 		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccResourceVSphereVirtualMachineConfigBase(),
+			},
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionPinDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				Check: resource.ComposeTestCheckFunc(
+					testAccResourceVSphereVirtualMachineCheckExists(true),
+					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(1, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				),
+			},
+			{
 				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionPinDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
 					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
 					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
 					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(1, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-				),
-			},
-			{
-				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionPinDatastore("testacc-nfsds1"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckVmxDatastore("testacc-nfsds1"),
-					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, "testacc-nfsds1"),
-					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(1, "testacc-nfsds1"),
 				),
 			},
 		},
@@ -2139,27 +2148,27 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionRenamedVirtualMachine(t 
 		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("testacc-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-				Check: resource.ComposeTestCheckFunc(
-					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-				),
-			},
-			{
-				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("testacc-foobar-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-				Check: resource.ComposeTestCheckFunc(
-					testAccResourceVSphereVirtualMachineCheckExists(true),
-					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
-				),
-			},
-			{
-				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("foobar-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("testacc-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceVSphereVirtualMachineCheckExists(true),
 					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
 					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				),
+			},
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("testacc-foobar-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				Check: resource.ComposeTestCheckFunc(
+					testAccResourceVSphereVirtualMachineCheckExists(true),
+					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2")),
+				),
+			},
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigStorageVMotionRename("foobar-test", os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
+				Check: resource.ComposeTestCheckFunc(
+					testAccResourceVSphereVirtualMachineCheckExists(true),
+					testAccResourceVSphereVirtualMachineCheckVmxDatastore(os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
+					testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME")),
 				),
 			},
 		},
@@ -2199,6 +2208,9 @@ func TestAccResourceVSphereVirtualMachine_storageVMotionLinkedClones(t *testing.
 						return testAccResourceVSphereVirtualMachineCheckVmdkDatastore(0, os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME2"))(s)
 					},
 				),
+			},
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigBase(),
 			},
 		},
 	})
@@ -2387,6 +2399,9 @@ func TestAccResourceVSphereVirtualMachine_transitionToLabelAttachedDisk(t *testi
 		Providers:    testAccProviders,
 		CheckDestroy: testAccResourceVSphereVirtualMachineCheckExists(false),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceVSphereVirtualMachineConfigBase(),
+			},
 			{
 				Config: testAccResourceVSphereVirtualMachineConfigExistingVmdkWithName(),
 				Check: resource.ComposeTestCheckFunc(
@@ -5277,39 +5292,6 @@ resource "vsphere_resource_pool" "pool" {
   parent_resource_pool_id = "${vsphere_resource_pool.pool1.id}"
 }
 
-resource "vsphere_virtual_machine" "template" {
-  name             = "testacc-template"
-  resource_pool_id = "${vsphere_resource_pool.pool.id}"
-  datastore_id     = vsphere_nas_datastore.ds1.id
-
-  num_cpus = 2
-  memory   = 2048
-  guest_id = "${data.vsphere_virtual_machine.template.guest_id}"
-
-  wait_for_guest_net_timeout = -1
-
-  network_interface {
-    network_id   = "${data.vsphere_network.network1.id}"
-    adapter_type = "${data.vsphere_virtual_machine.template.network_interface_types[0]}"
-  }
-
-  disk {
-    label            = "disk0"
-    size             = "${data.vsphere_virtual_machine.template.disks.0.size}"
-    eagerly_scrub    = "${data.vsphere_virtual_machine.template.disks.0.eagerly_scrub}"
-    thin_provisioned = "${data.vsphere_virtual_machine.template.disks.0.thin_provisioned}"
-  }
-
-  clone {
-    template_uuid = "${data.vsphere_virtual_machine.template.id}"
-    linked_clone  = "${var.linked_clone != "" ? "true" : "false" }"
-  }
-
-  cdrom {
-    client_device = true
-  }
-}
-
 resource "vsphere_virtual_machine" "vm" {
   name             = "testacc-test"
   resource_pool_id = "${vsphere_resource_pool.pool.id}"
@@ -5334,12 +5316,15 @@ resource "vsphere_virtual_machine" "vm" {
   }
 
   clone {
-    template_uuid = vsphere_virtual_machine.template.id
+    template_uuid = data.vsphere_virtual_machine.template.id
     linked_clone  = "${var.linked_clone != "" ? "true" : "false" }"
 
 	customize {
-      hostname = "testacc-test"
-      domain   = "testdomain.internal"
+      linux_options {
+        host_name = "testacc-test"
+        domain   = "testdomain.internal"
+      }
+      network_interface {}
     }
   }
 
@@ -5694,9 +5679,6 @@ resource "vsphere_virtual_machine" "vm" {
   clone {
     template_uuid = "${data.vsphere_virtual_machine.template.id}"
     linked_clone  = "${var.linked_clone != "" ? "true" : "false" }"
-
-
-      network_interface {}
   }
 
   cdrom {
@@ -6168,7 +6150,7 @@ data "vsphere_datastore" "ds" {
 resource "vsphere_virtual_machine" "vm" {
   name             = "testacc-test"
   resource_pool_id = "${vsphere_resource_pool.pool1.id}"
-  datastore_id     = vsphere_nas_datastore.ds1.id
+  datastore_id     = data.vsphere_datastore.ds.id
 
   num_cpus = 2
   memory   = 2048
@@ -6483,8 +6465,8 @@ variable "extra_vmdk_name" {
 }
 
 data "vsphere_datastore" "ds" {
-  datacenter = data.vsphere_datacenter.rootdc1.name
-  name       = var.datastore  
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
+  name          = var.datastore  
 }
 
 resource "vsphere_virtual_disk" "disk" {
@@ -7106,7 +7088,7 @@ resource "vsphere_virtual_machine" "vm" {
 	wait_for_guest_net_timeout = -1
 
   network_interface { 
-    network_id = data.vsphere_network.n.id
+    network_id = data.vsphere_network.network1.id
   }
     disk {
       attach       = true

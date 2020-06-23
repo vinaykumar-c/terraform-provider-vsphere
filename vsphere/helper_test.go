@@ -1287,3 +1287,21 @@ func folderSweep(r string) error {
 	}
 	return nil
 }
+
+func sessionSweep(r string) error {
+	client, err := sweepVSphereClient()
+	if err != nil {
+		return err
+	}
+	folders, err := folder.List(client.vimClient)
+	if err != nil {
+		return err
+	}
+	for _, f := range folders {
+		if regexp.MustCompile("testacc").Match([]byte(f.Name())) {
+			_, err = f.Destroy(context.TODO())
+			return err
+		}
+	}
+	return nil
+}

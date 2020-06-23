@@ -150,7 +150,7 @@ resource "vsphere_nas_datastore" "ds1" {
 
 func ConfigDataRootComputeCluster1() string {
 	return fmt.Sprintf(`
-data "vsphere_compute_cluster" "rootcompute_cluster" {
+data "vsphere_compute_cluster" "rootcompute_cluster1" {
 	name          = "%s"
 	datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
@@ -201,6 +201,8 @@ resource "vsphere_virtual_machine" "nested-esxi1" {
   memory   = 6144
   guest_id = "other3xLinux64Guest"
 
+  wait_for_guest_net_timeout = -1
+
   network_interface {
     network_id = data.vsphere_network.vmnet.id
   }
@@ -236,13 +238,13 @@ data "vsphere_host_thumbprint" "thumb" {
 }
 
 resource "vsphere_host" "nested-esxi1" {
-  hostname   = vsphere_virtual_machine.nested-esxi1.default_ip_address
-  username   = "root"
-  password   = "VMware1!"
-  license    = "%s"
-  force      = true
-  thumbprint = data.vsphere_host_thumbprint.thumb.id
-  datacenter = data.vsphere_datacenter.rootdc1.id
+  hostname                   = vsphere_virtual_machine.nested-esxi1.default_ip_address
+  username                   = "root"
+  password                   = "VMware1!"
+  license                    = "%s"
+  force                      = true
+  thumbprint                 = data.vsphere_host_thumbprint.thumb.id
+  datacenter                 = data.vsphere_datacenter.rootdc1.id
 }
 `, os.Getenv("TF_VAR_VSPHERE_LICENSE"))
 }
