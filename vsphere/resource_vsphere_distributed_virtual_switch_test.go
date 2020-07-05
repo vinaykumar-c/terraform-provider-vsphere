@@ -649,13 +649,6 @@ func testAccResourceVSphereDistributedVirtualSwitchConfig() string {
 	return fmt.Sprintf(`
 %s
 
-variable "esxi_hosts" {
-  default = [
-    "%s",
-    "%s",
-  ]
-}
-
 variable "network_interfaces" {
   default = [
     "%s",
@@ -663,9 +656,9 @@ variable "network_interfaces" {
 }
 
 data "vsphere_host" "host" {
-  count         = "${length(var.esxi_hosts)}"
-  name          = "${var.esxi_hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_distributed_virtual_switch" "dvs" {
@@ -674,23 +667,11 @@ resource "vsphere_distributed_virtual_switch" "dvs" {
 
   host {
     host_system_id = "${data.vsphere_host.host.0.id}"
-    devices = "${var.network_interfaces}"
-  }
-
-  host {
-    host_system_id = "${data.vsphere_host.host.1.id}"
-    devices = "${var.network_interfaces}"
-  }
-
-  host {
-    host_system_id = "${data.vsphere_host.host.2.id}"
-    devices = "${var.network_interfaces}"
+    devices = "vmnic1"
   }
 }
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI1"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI2"),
 		os.Getenv("TF_VAR_VSPHERE_ESXI_TRUNK_NIC"),
 	)
 }

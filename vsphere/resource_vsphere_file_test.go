@@ -339,25 +339,25 @@ func testAccCheckVSphereFileExists(n string, df string, exists bool) resource.Te
 
 const testAccCheckVSphereFileConfig = `
 resource "vsphere_file" "%s" {
-	datacenter = "%s"
-	datastore = "%s"
-	source_file = "%s"
+	datacenter       = "%s"
+	datastore        = "%s"
+	source_file      = "%s"
 	destination_file = "%s"
 }
 `
 const testAccCheckVSphereFileCopyConfig = `
 resource "vsphere_file" "%s" {
-	datacenter = "%s"
-	datastore = "%s"
-	source_file = "%s"
+	datacenter       = "%s"
+	datastore        = "%s"
+	source_file      = "%s"
 	destination_file = "%s"
 }
 resource "vsphere_file" "%s" {
 	source_datacenter = "%s"
-	datacenter = "%s"
-	source_datastore = "%s"
-	datastore = "%s"
-	source_file = "%s"
-	destination_file = "%s"
+	datacenter        = "%s"
+	source_datastore  = "%s"
+	datastore         = "%s"
+	source_file       = "%s"
+	destination_file  = "%s"
 }
 `

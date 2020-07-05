@@ -261,10 +261,8 @@ func nicExists(client *govmomi.Client, nicId string) (bool, error) {
 
 func testAccVSphereVNicConfig_hvs(netConfig string) string {
 	return fmt.Sprintf(`
-	data "vsphere_datacenter" "dc" {
-	  name = "%s"
-	}
-	
+%s
+
 	data "vsphere_host" "h1" {
 	  name          = "%s"
 	  datacenter_id = data.vsphere_datacenter.rootdc1.id
@@ -301,10 +299,8 @@ func testAccVSphereVNicConfig_hvs(netConfig string) string {
 
 func testAccVSphereVNicConfig_dvs(netConfig string) string {
 	return fmt.Sprintf(`
-	data "vsphere_datacenter" "dc" {
-	  name = "%s"
-	}
-	
+%s
+
 	data "vsphere_host" "h1" {
 	  name          = "%s"
 	  datacenter_id = data.vsphere_datacenter.rootdc1.id

@@ -179,7 +179,7 @@ variable "rstring" {
 }
 
 data "vsphere_datastore" "ds" {
-  name          = "${var.datastore}"
+  name          = vsphere_nas_datastore.ds1.name
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 
@@ -206,7 +206,7 @@ variable "rstring" {
 }
 
 data "vsphere_datastore" "ds" {
-  name          = "${var.datastore}"
+  name          = vsphere_nas_datastore.ds1.name
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 
@@ -234,7 +234,7 @@ variable "rstring" {
 }
 
 data "vsphere_datastore" "ds" {
-  name          = "${var.datastore}"
+  name          = vsphere_nas_datastore.ds1.name
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 
@@ -263,7 +263,7 @@ variable "rstring" {
 }
 
 data "vsphere_datastore" "ds" {
-  name          = "${var.datastore}"
+  name          = vsphere_nas_datastore.ds1.name
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 

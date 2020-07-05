@@ -348,12 +348,6 @@ func testAccResourceVSphereNasDatastorePreCheck(t *testing.T) {
 	if os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME") == "" {
 		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST to run vsphere_vmfs_disks acceptance tests")
 	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST2 to run vsphere_vmfs_disks acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST3 to run vsphere_vmfs_disks acceptance tests")
-	}
 	if os.Getenv("TF_VAR_VSPHERE_NAS_HOST") == "" {
 		t.Skip("set TF_VAR_VSPHERE_NAS_HOST to run vsphere_nas_datastore acceptance tests")
 	}

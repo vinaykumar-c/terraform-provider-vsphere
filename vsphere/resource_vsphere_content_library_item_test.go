@@ -107,12 +107,7 @@ func testAccResourceVSphereContentLibraryItemType(expected *regexp.Regexp) resou
 
 func testAccResourceVSphereContentLibraryItemConfig() string {
 	return fmt.Sprintf(`
-variable "datacenter" {
-  type    = "string"
-  default = "%s"
-}
-
-
+%s
 
 variable "file_list" {
   type    = list(string)
@@ -125,7 +120,7 @@ data "vsphere_datacenter" "dc" {
 
 data "vsphere_datastore" "ds" {
   datacenter_id = data.vsphere_datacenter.rootdc1.id
-  name = var.datastore
+  name = vsphere_nas_datastore.ds1.name
 }
 
 resource "vsphere_content_library" "library" {

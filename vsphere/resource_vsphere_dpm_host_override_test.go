@@ -189,17 +189,10 @@ func testAccResourceVSphereDPMHostOverrideConfigDefaults() string {
 	return fmt.Sprintf(`
 %s
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-  ]
-}
-
 data "vsphere_host" "hosts" {
-  count         = "${length(var.hosts)}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_compute_cluster" "compute_cluster" {
@@ -215,9 +208,7 @@ resource "vsphere_dpm_host_override" "dpm_host_override" {
   host_system_id       = "${data.vsphere_host.hosts.0.id}"
 }
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI1"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI2"),
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigResNestedEsxi()),
 	)
 }
 

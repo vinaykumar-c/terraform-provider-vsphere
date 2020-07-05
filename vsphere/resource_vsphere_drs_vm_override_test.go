@@ -198,7 +198,7 @@ func testAccResourceVSphereDRSVMOverrideConfigOverrideDRSEnabled() string {
 
 resource "vsphere_virtual_machine" "vm" {
   name             = "testacc-test"
-  resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
   datastore_id     = vsphere_nas_datastore.ds1.id
 
   num_cpus = 2
@@ -218,7 +218,7 @@ resource "vsphere_virtual_machine" "vm" {
 }
 
 resource "vsphere_drs_vm_override" "drs_vm_override" {
-  compute_cluster_id = "${data.vsphere_compute_cluster.rootcluster1.id}"
+  compute_cluster_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.id}"
   virtual_machine_id = "${vsphere_virtual_machine.vm.id}"
   drs_enabled        = false
 }
@@ -233,7 +233,7 @@ func testAccResourceVSphereDRSVMOverrideConfigOverrideAutomationLevel() string {
 
 resource "vsphere_virtual_machine" "vm" {
   name             = "testacc-test"
-  resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
   datastore_id     = vsphere_nas_datastore.ds1.id
 
   num_cpus = 2
@@ -253,7 +253,7 @@ resource "vsphere_virtual_machine" "vm" {
 }
 
 resource "vsphere_drs_vm_override" "drs_vm_override" {
-  compute_cluster_id   = "${data.vsphere_compute_cluster.rootcluster1.id}"
+  compute_cluster_id   = "${data.vsphere_compute_cluster.rootcompute_cluster1.id}"
   virtual_machine_id   = "${vsphere_virtual_machine.vm.id}"
   drs_enabled          = true
   drs_automation_level = "fullyAutomated"

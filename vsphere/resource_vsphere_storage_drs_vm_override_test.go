@@ -130,12 +130,6 @@ func testAccResourceVSphereStorageDrsVMOverridePreCheck(t *testing.T) {
 	if os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME") == "" {
 		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST to run vsphere_storage_drs_vm_override acceptance tests")
 	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST2 to run vsphere_storage_drs_vm_override acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST3 to run vsphere_storage_drs_vm_override acceptance tests")
-	}
 	if os.Getenv("TF_VAR_VSPHERE_RESOURCE_POOL") == "" {
 		t.Skip("set TF_VAR_VSPHERE_RESOURCE_POOL to run vsphere_storage_drs_vm_override acceptance tests")
 	}

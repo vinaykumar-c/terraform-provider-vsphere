@@ -321,7 +321,7 @@ data "vsphere_datastore" "datastore" {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -372,7 +372,7 @@ func testAccResourceVSphereVAppEntityConfigNonDefault() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -428,7 +428,7 @@ func testAccResourceVSphereVAppEntityConfigMultipleDefault() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -502,7 +502,7 @@ func testAccResourceVSphereVAppEntityConfigMultipleNonDefault() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {

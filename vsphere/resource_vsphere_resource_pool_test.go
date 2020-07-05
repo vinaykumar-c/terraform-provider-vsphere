@@ -462,12 +462,12 @@ func testAccResourceVSphereResourcePoolConfigAltParent() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_resource_pool" "alt_parent_resource_pool" {
   name                    = "alt-terraform-resource-pool-test-paren"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_resource_pool" "resource_pool" {
@@ -485,7 +485,7 @@ func testAccResourceVSphereResourcePoolConfigNonDefault() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_resource_pool" "resource_pool" {
@@ -550,7 +550,7 @@ resource "vsphere_tag" "testacc-tag" {
 
 resource "vsphere_resource_pool" "resource_pool" {
   name                    = "terraform-resource-pool-test"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
   tags                    = ["${vsphere_tag.testacc-tag.id}"]
 }
 `,
@@ -564,7 +564,7 @@ func testAccResourceVSphereResourcePoolConfigRename() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_resource_pool" "resource_pool" {
@@ -582,7 +582,7 @@ func testAccResourceVSphereResourcePoolConfigBasic() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "terraform-resource-pool-test-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_resource_pool" "resource_pool" {

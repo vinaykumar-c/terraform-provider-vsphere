@@ -213,21 +213,10 @@ func testAccResourceVSphereComputeClusterHostGroupConfig(count int) string {
 	return fmt.Sprintf(`
 %s
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-  ]
-}
-
-variable "host_count" {
-  default = "%d"
-}
-
 data "vsphere_host" "hosts" {
-  count         = "${var.host_count}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_compute_cluster" "cluster" {
@@ -244,9 +233,6 @@ resource "vsphere_compute_cluster_host_group" "cluster_host_group" {
   host_system_ids    = "${data.vsphere_host.hosts.*.id}"
 }
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI1"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI2"),
-		count,
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigResNestedEsxi()),
 	)
 }

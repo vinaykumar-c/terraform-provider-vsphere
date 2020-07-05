@@ -228,7 +228,7 @@ variable "vm_count" {
 resource "vsphere_virtual_machine" "vm" {
   count            = "${var.vm_count}"
   name             = "terraform-test-${count.index}"
-  resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
   datastore_id     = vsphere_nas_datastore.ds1.id
 
   num_cpus = 2
@@ -249,7 +249,7 @@ resource "vsphere_virtual_machine" "vm" {
 
 resource "vsphere_compute_cluster_vm_group" "cluster_vm_group" {
   name                = "terraform-test-cluster-group"
-  compute_cluster_id  = "${data.vsphere_compute_cluster.rootcluster1.id}"
+  compute_cluster_id  = "${data.vsphere_compute_cluster.rootcompute_cluster1.id}"
   virtual_machine_ids = "${vsphere_virtual_machine.vm.*.id}"
 }
 `,

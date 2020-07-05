@@ -258,9 +258,7 @@ resource "vsphere_tag" "testacc-tag" {
 
 func testAccResourceVSphereTagConfigOnFolderAttached() string {
 	return fmt.Sprintf(`
-data "vsphere_datacenter" "dc" {
-  name = "%s"
-}
+  %s
 
 resource "vsphere_tag_category" "testacc-category" {
   name        = "testacc-category"
@@ -291,9 +289,7 @@ resource "vsphere_folder" "folder" {
 
 func testAccResourceVSphereTagConfigOnFolderNotAttached() string {
 	return fmt.Sprintf(`
-data "vsphere_datacenter" "dc" {
-  name = "%s"
-}
+%s
 
 resource "vsphere_tag_category" "testacc-category" {
   name        = "testacc-category"

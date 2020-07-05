@@ -3,7 +3,6 @@ package vsphere
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-vsphere/vsphere/internal/helper/testhelper"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -203,21 +202,6 @@ func TestAccResourceVSphereDistributedPortGroup_multiCustomAttribute(t *testing.
 }
 
 func testAccResourceVSphereDistributedPortGroupPreCheck(t *testing.T) {
-	if os.Getenv("TF_VAR_VSPHERE_HOST_NIC0") == "" {
-		t.Skip("set TF_VAR_VSPHERE_HOST_NIC0 to run vsphere_host_virtual_switch acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_HOST_NIC1") == "" {
-		t.Skip("set TF_VAR_VSPHERE_HOST_NIC1 to run vsphere_host_virtual_switch acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST to run vsphere_host_virtual_switch acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST2 to run vsphere_host_virtual_switch acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3") == "" {
-		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST3 to run vsphere_host_virtual_switch acceptance tests")
-	}
 }
 
 func testAccResourceVSphereDistributedPortGroupExists(expected bool) resource.TestCheckFunc {

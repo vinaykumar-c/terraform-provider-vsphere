@@ -395,15 +395,6 @@ func testAccResourceVSphereVmfsDatastorePreCheck(t *testing.T) {
 	if os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME") == "" {
 		t.Skip("set TF_VAR_VSPHERE_ESXI_HOST to run vsphere_vmfs_disks acceptance tests")
 	}
-	if os.Getenv("TF_VAR_VSPHERE_DS_VMFS_DISK0") == "" {
-		t.Skip("set TF_VAR_VSPHERE_DS_VMFS_DISK0 to run vsphere_vmfs_datastore acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_DS_VMFS_DISK1") == "" {
-		t.Skip("set TF_VAR_VSPHERE_DS_VMFS_DISK1 to run vsphere_vmfs_datastore acceptance tests")
-	}
-	if os.Getenv("TF_VAR_VSPHERE_DS_VMFS_DISK2") == "" {
-		t.Skip("set TF_VAR_VSPHERE_DS_VMFS_DISK2 to run vsphere_vmfs_datastore acceptance tests")
-	}
 	if os.Getenv("TF_VAR_VSPHERE_VMFS_REGEXP") == "" {
 		t.Skip("set TF_VAR_VSPHERE_VMFS_REGEXP to run vsphere_vmfs_datastore acceptance tests")
 	}

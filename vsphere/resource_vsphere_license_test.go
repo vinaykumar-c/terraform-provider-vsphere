@@ -77,6 +77,7 @@ func TestAccResourceVSphereLicense_withLabelsOnVCenter(t *testing.T) {
 		CheckDestroy: testAccVSphereLicenseDestroy,
 		Steps: []resource.TestStep{
 			{
+				Destroy: false,
 				Config: testAccVSphereLicenseWithLabelConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccVSphereLicenseWithLabelExists("vsphere_license.foo"),
@@ -132,6 +133,10 @@ func testAccVSphereLicenseBasicConfig() string {
 	return fmt.Sprintf(`
 resource "vsphere_license" "foo" {
  license_key = "%s"
+  labels {
+    VpxClientLicenseLabel = "Hello World"
+	TestTitle             = "fooBar"
+  }
 }
 `, os.Getenv("TF_VAR_VSPHERE_LICENSE"))
 }

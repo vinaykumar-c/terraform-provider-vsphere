@@ -461,7 +461,7 @@ func testAccResourceVSphereVAppContainerConfigBasic() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -502,18 +502,10 @@ variable "nas_host" {
   default = "%s"
 }
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-    "%s",
-  ]
-}
-
 data "vsphere_host" "esxi_hosts" {
-  count         = "${length(var.hosts)}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_datastore_cluster" "datastore_cluster" {
@@ -534,7 +526,7 @@ resource "vsphere_nas_datastore" "datastore1" {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -572,12 +564,8 @@ resource "vsphere_virtual_machine" "vm" {
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
 
-		os.Getenv("TF_VAR_VSPHERE_NFS_PATH"),
-		os.Getenv("TF_VAR_VSPHERE_NAS_HOST"),
-
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3"),
+		os.Getenv("TF_VAR_VSPHERE_NFS_PATH2"),
+		os.Getenv("TF_VAR_VSPHERE_NAS_HOST2"),
 	)
 }
 
@@ -593,18 +581,10 @@ variable "nas_host" {
   default = "%s"
 }
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-    "%s",
-  ]
-}
-
 data "vsphere_host" "esxi_hosts" {
-  count         = "${length(var.hosts)}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_datastore_cluster" "datastore_cluster" {
@@ -625,7 +605,7 @@ resource "vsphere_nas_datastore" "datastore1" {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -663,12 +643,8 @@ resource "vsphere_virtual_machine" "vm" {
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
 
-		os.Getenv("TF_VAR_VSPHERE_NFS_PATH"),
-		os.Getenv("TF_VAR_VSPHERE_NAS_HOST"),
-
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3"),
+		os.Getenv("TF_VAR_VSPHERE_NFS_PATH2"),
+		os.Getenv("TF_VAR_VSPHERE_NAS_HOST2"),
 	)
 }
 
@@ -684,22 +660,14 @@ variable "nas_host" {
   default = "%s"
 }
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-    "%s",
-  ]
-}
-
 variable "template" {
   default = "%s"
 }
 
 data "vsphere_host" "esxi_hosts" {
-  count         = "${length(var.hosts)}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  count         = 1
+  name          = vsphere_host.nested_esxi1.name
+  datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 
 data "vsphere_virtual_machine" "template" {
@@ -725,7 +693,7 @@ resource "vsphere_nas_datastore" "datastore1" {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -767,12 +735,8 @@ resource "vsphere_virtual_machine" "vm" {
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
 
-		os.Getenv("TF_VAR_VSPHERE_NFS_PATH"),
-		os.Getenv("TF_VAR_VSPHERE_NAS_HOST"),
-
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST2"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI_HOST3"),
+		os.Getenv("TF_VAR_VSPHERE_NFS_PATH2"),
+		os.Getenv("TF_VAR_VSPHERE_NAS_HOST2"),
 		os.Getenv("TF_VAR_VSPHERE_TEMPLATE"),
 	)
 }
@@ -792,7 +756,7 @@ data "vsphere_virtual_machine" "template" {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -844,7 +808,7 @@ func testAccResourceVSphereVAppContainerConfigVM() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -889,7 +853,7 @@ func testAccResourceVSphereVAppContainerConfigVMOutsideVApp() string {
 
 resource "vsphere_resource_pool" "parent_resource_pool" {
   name                    = "resource-pool-parent"
-  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcluster1.resource_pool_id}"
+  parent_resource_pool_id = "${data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id}"
 }
 
 resource "vsphere_folder" "parent_folder" {
@@ -944,7 +908,7 @@ resource "vsphere_folder" "parent_folder" {
 
 resource "vsphere_vapp_container" "parent" {
   name                    = "parentVApp"
-  parent_resource_pool_id = data.vsphere_compute_cluster.rootcluster1.resource_pool_id
+  parent_resource_pool_id = data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id
   parent_folder_id        = vsphere_folder.parent_folder.id
 }
 

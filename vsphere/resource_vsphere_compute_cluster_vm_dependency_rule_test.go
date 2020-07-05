@@ -285,17 +285,10 @@ func testAccResourceVSphereComputeClusterVMDependencyRuleConfigBasic() string {
 	return fmt.Sprintf(`
 %s
 
-variable "hosts" {
-  default = [
-    "%s",
-    "%s",
-  ]
-}
-
 data "vsphere_host" "hosts" {
 	count         = "${length(var.hosts)}"
-  name          = "${var.hosts[count.index]}"
-  datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
+  name            = vsphere_host.nexted_esxi1.name
+  datacenter_id   = data.vsphere_datacenter.rootdc1.id
 }
 
 resource "vsphere_compute_cluster" "cluster" {
@@ -367,9 +360,7 @@ resource "vsphere_compute_cluster_vm_dependency_rule" "cluster_vm_dependency_rul
   vm_group_name            = "${vsphere_compute_cluster_vm_group.cluster_vm_group.name}"
 }
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_ESXI1"),
-		os.Getenv("TF_VAR_VSPHERE_ESXI2"),
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigResNestedEsxi()),
 	)
 }
 
