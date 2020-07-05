@@ -321,7 +321,7 @@ variable "nfs_path" {
 
 data "vsphere_host" "esxi_hosts" {
   count         = 1
-  name          = vsphere_host.nested_esxi1.name
+  name          = vsphere_host.nested_esxi1.hostname
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 
