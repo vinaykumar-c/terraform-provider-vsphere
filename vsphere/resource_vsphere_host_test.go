@@ -439,7 +439,7 @@ func testAccVSphereHostConfig_emptyLicense() string {
 	  # Makes sense to update
 	  datacenter = data.vsphere_datacenter.rootdc1.id
 	}
-	`, testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
+	`, testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()))
 }
 
 func testAccVSphereHostConfig_import() string {
