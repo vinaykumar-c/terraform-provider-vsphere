@@ -78,7 +78,7 @@ func TestAccResourceVSphereLicense_withLabelsOnVCenter(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Destroy: false,
-				Config: testAccVSphereLicenseWithLabelConfig(),
+				Config:  testAccVSphereLicenseWithLabelConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccVSphereLicenseWithLabelExists("vsphere_license.foo"),
 				),

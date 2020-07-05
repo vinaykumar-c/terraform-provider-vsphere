@@ -22,7 +22,7 @@ func TestAccDataSourceVSphereVAppContainer_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: testAccDataSourceVSphereVAppContainerConfig(),
+				Config:             testAccDataSourceVSphereVAppContainerConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.vsphere_vapp_container.container", "id", regexp.MustCompile("^resgroup-")),
 				),
@@ -43,7 +43,7 @@ func TestAccDataSourceVSphereVAppContainer_path(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ExpectNonEmptyPlan: true,
-				Config: testAccDataSourceVSphereVAppContainerPathConfig(),
+				Config:             testAccDataSourceVSphereVAppContainerPathConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.vsphere_vapp_container.container", "id", regexp.MustCompile("^resgroup-")),
 				),
