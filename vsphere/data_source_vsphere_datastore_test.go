@@ -23,7 +23,7 @@ func TestAccDataSourceVSphereDatastore_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.vsphere_datastore.datastore_data", "id",
-						"vsphere_nas_datastore.datastore", "id",
+						"vsphere_nas_datastore.ds1", "id",
 					),
 				),
 			},
@@ -45,7 +45,7 @@ func TestAccDataSourceVSphereDatastore_noDatacenterAndAbsolutePath(t *testing.T)
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(
 						"data.vsphere_datastore.datastore_data", "id",
-						"vsphere_nas_datastore.datastore", "id",
+						"vsphere_nas_datastore.ds1", "id",
 					),
 				),
 			},
@@ -67,12 +67,11 @@ func testAccDataSourceVSphereDatastoreConfig() string {
 %s
 
 data "vsphere_datastore" "datastore_data" {
-  name          = "%s"
+  name          = vsphere_nas_datastore.ds1.name
   datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME"),
 	)
 }
 
@@ -81,10 +80,9 @@ func testAccDataSourceVSphereDatastoreConfigAbsolutePath() string {
 %s
 
 data "vsphere_datastore" "datastore_data" {
-  name = "/${data.vsphere_datacenter.rootdc1.name}/datastore/%s"
+  name = "/${data.vsphere_datacenter.rootdc1.name}/datastore/${vsphere_nas_datastore.ds1.name}"
 }
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootHost2(), testhelper.ConfigResDS1(), testhelper.ConfigDataRootComputeCluster1(), testhelper.ConfigResResourcePool1(), testhelper.ConfigDataRootPortGroup1()),
-		os.Getenv("TF_VAR_VSPHERE_NFS_DS_NAME"),
 	)
 }

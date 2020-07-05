@@ -69,7 +69,7 @@ func TestAccDataSourceVSphereNetwork_hostPortgroups(t *testing.T) {
 			{
 				Config: testAccDataSourceVSphereNetworkConfigHostPortgroup(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.vsphere_network.net", "type", "Network"),
+					resource.TestCheckResourceAttr("data.vsphere_network.vmnet", "type", "Network"),
 				),
 			},
 		},
@@ -131,24 +131,7 @@ data "vsphere_network" "net" {
 func testAccDataSourceVSphereNetworkConfigHostPortgroup() string {
 	return fmt.Sprintf(`
 %s
-
-resource "vsphere_host_virtual_switch" "switch" {
-  name           = "vSwitchTerraformTest"
-  host_system_id = "${data.vsphere_host.esxi_host.id}"
-
-  network_adapters = ["${var.host_nic0}", "${var.host_nic1}"]
-  active_nics      = ["${var.host_nic0}", "${var.host_nic1}"]
-  standby_nics     = []
-}
-
-resource "vsphere_host_port_group" "pg" {
-  name                = "PGTerraformTest"
-  host_system_id      = "${data.vsphere_host.esxi_host.id}"
-  virtual_switch_name = "${vsphere_host_virtual_switch.switch.name}"
-}
-
-
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigDataRootHost1(), testhelper.ConfigDataRootVMNet()),
 	)
 }

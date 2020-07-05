@@ -48,6 +48,16 @@ func init() {
 		Dependencies: nil,
 		F:            dsSweep,
 	})
+	resource.AddTestSweepers("dsps", &resource.Sweeper{
+		Name:         "dsp_cleanup",
+		Dependencies: nil,
+		F:            dspSweep,
+	})
+	resource.AddTestSweepers("ccs", &resource.Sweeper{
+		Name:         "cc_cleanup",
+		Dependencies: nil,
+		F:            ccSweep,
+	})
 }
 
 func testAccClientPreCheck(t *testing.T) {

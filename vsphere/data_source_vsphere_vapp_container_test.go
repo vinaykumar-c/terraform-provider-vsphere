@@ -21,6 +21,7 @@ func TestAccDataSourceVSphereVAppContainer_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				ExpectNonEmptyPlan: true,
 				Config: testAccDataSourceVSphereVAppContainerConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.vsphere_vapp_container.container", "id", regexp.MustCompile("^resgroup-")),
@@ -41,6 +42,7 @@ func TestAccDataSourceVSphereVAppContainer_path(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				ExpectNonEmptyPlan: true,
 				Config: testAccDataSourceVSphereVAppContainerPathConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr("data.vsphere_vapp_container.container", "id", regexp.MustCompile("^resgroup-")),
@@ -68,8 +70,8 @@ data "vsphere_datacenter" "dc" {
 }
 
 resource "vsphere_vapp_container" "vapp" {
-  name                 = "vapp-test"
-  parent_resource_pool = data.vsphere_compute_cluster.rootcluster1.resource_pool_id
+  name                    = "vapp-test"
+  parent_resource_pool_id = data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id
 }
 
 data "vsphere_vapp_container" "container" {
@@ -91,12 +93,12 @@ data "vsphere_datacenter" "dc" {
 }
 
 resource "vsphere_vapp_container" "vapp" {
-  name                 = "vapp-test"
-  parent_resource_pool = data.vsphere_compute_cluster.rootcluster1.resource_pool_id
+  name                    = "vapp-test"
+  parent_resource_pool_id = data.vsphere_compute_cluster.rootcompute_cluster1.resource_pool_id
 }
 
 data "vsphere_vapp_container" "container" {
-  name          = "/${data.vsphere_datacenter.rootdc1.name}/vm/vapp-test"
+  name          = "/${data.vsphere_datacenter.rootdc1.name}/vm/${vsphere_vapp_container.vapp.name}"
   datacenter_id = data.vsphere_datacenter.rootdc1.id
 }
 `,

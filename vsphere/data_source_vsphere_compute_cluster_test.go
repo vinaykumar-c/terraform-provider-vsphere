@@ -88,7 +88,7 @@ resource "vsphere_compute_cluster" "compute_cluster" {
 }
 
 data "vsphere_compute_cluster" "compute_cluster_data" {
-  name          = "/${data.vsphere_datacenter.rootdc1.id}/host/${vsphere_compute_cluster.compute_cluster.name}"
+  name          = "/${data.vsphere_datacenter.rootdc1.name}/host/${vsphere_compute_cluster.compute_cluster.name}"
 }
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),

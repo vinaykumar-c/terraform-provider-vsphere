@@ -53,7 +53,7 @@ resource "vsphere_folder" "folder" {
 }
 
 data "vsphere_folder" "folder" {
-  path = "/${data.vsphere_datacenter.dc.name}/vm/vsphere_folder.folder.path}"
+  path = "/${data.vsphere_datacenter.dc.name}/vm/${vsphere_folder.folder.path}"
 }
 `, os.Getenv("TF_VAR_VSPHERE_DATACENTER"))
 }

@@ -114,11 +114,11 @@ variable "resource_pool" {
 }
 
 data "vsphere_resource_pool" "pool" {
-  name          = "${var.cluster}/Resources/${var.resource_pool}"
+  name          = "${data.vsphere_compute_cluster.rootcompute_cluster1.name}/Resources/${var.resource_pool}"
   datacenter_id = "${data.vsphere_datacenter.rootdc1.id}"
 }
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigDataRootComputeCluster1()),
 
 		os.Getenv("TF_VAR_VSPHERE_RESOURCE_POOL"),
 	)
@@ -133,10 +133,10 @@ variable "resource_pool" {
 }
 
 data "vsphere_resource_pool" "pool" {
-  name = "/${data.vsphere_datacenter.rootdc1.name}/host/${var.cluster}/Resources/${var.resource_pool}"
+  name = "/${data.vsphere_datacenter.rootdc1.name}/host/${data.vsphere_compute_cluster.rootcompute_cluster1.name}/Resources/${var.resource_pool}"
 }
 `,
-		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
+		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1(), testhelper.ConfigDataRootComputeCluster1()),
 
 		os.Getenv("TF_VAR_VSPHERE_RESOURCE_POOL"),
 	)

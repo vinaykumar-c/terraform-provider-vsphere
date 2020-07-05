@@ -1250,6 +1250,40 @@ func dsSweep(r string) error {
 	return nil
 }
 
+func dspSweep(r string) error {
+	client, err := sweepVSphereClient()
+	if err != nil {
+		return err
+	}
+	dsps, err := storagepod.List(client.vimClient)
+	if err != nil {
+		return err
+	}
+	for _, dsp := range dsps {
+		if regexp.MustCompile("testacc").Match([]byte(dsp.Name())) {
+			return storagepod.Delete(dsp)
+		}
+	}
+	return nil
+}
+
+func ccSweep(r string) error {
+	client, err := sweepVSphereClient()
+	if err != nil {
+		return err
+	}
+	dsps, err := clustercomputeresource.List(client.vimClient)
+	if err != nil {
+		return err
+	}
+	for _, dsp := range dsps {
+		if regexp.MustCompile("testacc").Match([]byte(dsp.Name())) {
+			return clustercomputeresource.Delete(dsp)
+		}
+	}
+	return nil
+}
+
 func netSweep(r string) error {
 	client, err := sweepVSphereClient()
 	if err != nil {

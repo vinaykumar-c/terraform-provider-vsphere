@@ -80,7 +80,7 @@ resource "vsphere_datastore_cluster" "datastore_cluster" {
 }
 
 data "vsphere_datastore_cluster" "datastore_cluster_data" {
-  name          = "/${data.vsphere_datacenter.rootds1.id}/datastore/${vsphere_datastore_cluster.datastore_cluster.name}"
+  name          = "/${data.vsphere_datacenter.rootdc1.name}/datastore/${vsphere_datastore_cluster.datastore_cluster.name}"
 }
 `,
 		testhelper.CombineConfigs(testhelper.ConfigDataRootDC1(), testhelper.ConfigDataRootPortGroup1()),
