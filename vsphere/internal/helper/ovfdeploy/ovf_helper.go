@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"regexp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-provider-vsphere/vsphere/internal/helper/network"
 	"github.com/vmware/govmomi"
@@ -42,7 +43,7 @@ func (pr *ProgressReader) Read(p []byte) (n int, err error) {
 }
 
 func DeployOvfAndGetResult(ovfCreateImportSpecResult *types.OvfCreateImportSpecResult, resourcePoolObj *object.ResourcePool,
-	folder *object.Folder, host *object.HostSystem, filePath string, deployOva bool, fromLocal bool, allowUnverifiedSSL bool) error {
+	folder *object.Folder, host *object.HostSystem, filePath string, deployOva bool, fromLocal bool, allowUnverifiedSSL bool, host_ip string,) error {
 
 	var currBytesRead int64 = 0
 	var totalBytes int64 = 0
@@ -93,15 +94,15 @@ func DeployOvfAndGetResult(ovfCreateImportSpecResult *types.OvfCreateImportSpecR
 			}
 			if !deployOva {
 				if fromLocal {
-					err = uploadDisksFromLocal(filePath, ovfFileItem, deviceObj, &currBytesRead)
+					err = uploadDisksFromLocal(filePath, ovfFileItem, deviceObj, &currBytesRead, host_ip)
 				} else {
-					err = uploadDisksFromUrl(filePath, ovfFileItem, deviceObj, &currBytesRead, allowUnverifiedSSL)
+					err = uploadDisksFromUrl(filePath, ovfFileItem, deviceObj, &currBytesRead, allowUnverifiedSSL, host_ip)
 				}
 			} else {
 				if fromLocal {
-					err = uploadOvaDisksFromLocal(filePath, ovfFileItem, deviceObj, &currBytesRead)
+					err = uploadOvaDisksFromLocal(filePath, ovfFileItem, deviceObj, &currBytesRead, host_ip)
 				} else {
-					err = uploadOvaDisksFromUrl(filePath, ovfFileItem, deviceObj, &currBytesRead, allowUnverifiedSSL)
+					err = uploadOvaDisksFromUrl(filePath, ovfFileItem, deviceObj, &currBytesRead, allowUnverifiedSSL, host_ip)
 				}
 			}
 			if err != nil {
@@ -121,8 +122,10 @@ func DeployOvfAndGetResult(ovfCreateImportSpecResult *types.OvfCreateImportSpecR
 	return nil
 }
 
-func upload(ctx context.Context, item types.OvfFileItem, f io.Reader, url string, size int64, totalBytesRead *int64) error {
-
+func upload(ctx context.Context, item types.OvfFileItem, f io.Reader, url string, size int64, totalBytesRead *int64, host_ip string) error {
+	m1 := regexp.MustCompile(`//\*/`)
+	url = m1.ReplaceAllString(url, fmt.Sprintf("//%s/", host_ip))
+    log.Printf("Host url is %s", url)
 	u, err := soap.ParseURL(url)
 	if err != nil {
 		return err
@@ -180,7 +183,7 @@ func upload(ctx context.Context, item types.OvfFileItem, f io.Reader, url string
 	return err
 }
 
-func uploadDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64) error {
+func uploadDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64, host_ip string) error {
 	absoluteFilePath := ""
 	if strings.Contains(filePath, string(os.PathSeparator)) {
 		absoluteFilePath = string(filePath[0 : strings.LastIndex(filePath, string(os.PathSeparator))+1])
@@ -191,7 +194,7 @@ func uploadDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, device
 	if err != nil {
 		return err
 	}
-	err = upload(context.Background(), ovfFileItem, file, deviceObj.Url, ovfFileItem.Size, currBytesRead)
+	err = upload(context.Background(), ovfFileItem, file, deviceObj.Url, ovfFileItem.Size, currBytesRead, host_ip)
 	if err != nil {
 		return fmt.Errorf("error while uploading the file %s %s", vmdkFilePath, err)
 	}
@@ -203,7 +206,7 @@ func uploadDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, device
 }
 
 func uploadDisksFromUrl(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64,
-	allowUnverifiedSSL bool) error {
+	allowUnverifiedSSL bool, host_ip string) error {
 	absoluteFilePath := ""
 	if strings.Contains(filePath, "/") {
 		absoluteFilePath = string(filePath[0 : strings.LastIndex(filePath, "/")+1])
@@ -216,11 +219,11 @@ func uploadDisksFromUrl(filePath string, ovfFileItem types.OvfFileItem, deviceOb
 		return err
 	}
 	defer resp.Body.Close()
-	err = upload(context.Background(), ovfFileItem, resp.Body, deviceObj.Url, ovfFileItem.Size, currBytesRead)
+	err = upload(context.Background(), ovfFileItem, resp.Body, deviceObj.Url, ovfFileItem.Size, currBytesRead, host_ip)
 	return err
 }
 
-func uploadOvaDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64) error {
+func uploadOvaDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64, host_ip string) error {
 	diskName := ovfFileItem.Path
 	ovaFile, err := os.Open(filePath)
 	if err != nil {
@@ -228,12 +231,12 @@ func uploadOvaDisksFromLocal(filePath string, ovfFileItem types.OvfFileItem, dev
 	}
 	defer ovaFile.Close()
 
-	err = findAndUploadDiskFromOva(ovaFile, diskName, ovfFileItem, deviceObj, currBytesRead)
+	err = findAndUploadDiskFromOva(ovaFile, diskName, ovfFileItem, deviceObj, currBytesRead, host_ip)
 	return err
 }
 
 func uploadOvaDisksFromUrl(filePath string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64,
-	allowUnverifiedSSL bool) error {
+	allowUnverifiedSSL bool, host_ip string) error {
 	diskName := ovfFileItem.Path
 	client := getClient(allowUnverifiedSSL)
 	resp, err := client.Get(filePath)
@@ -242,7 +245,7 @@ func uploadOvaDisksFromUrl(filePath string, ovfFileItem types.OvfFileItem, devic
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
-		err = findAndUploadDiskFromOva(resp.Body, diskName, ovfFileItem, deviceObj, currBytesRead)
+		err = findAndUploadDiskFromOva(resp.Body, diskName, ovfFileItem, deviceObj, currBytesRead, host_ip)
 		if err != nil {
 			return err
 		}
@@ -331,7 +334,7 @@ func getOvfDescriptorFromOva(ovaFile io.Reader) (string, error) {
 	return "", fmt.Errorf("ovf file not found inside the ova")
 }
 
-func findAndUploadDiskFromOva(ovaFile io.Reader, diskName string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64) error {
+func findAndUploadDiskFromOva(ovaFile io.Reader, diskName string, ovfFileItem types.OvfFileItem, deviceObj types.HttpNfcLeaseDeviceUrl, currBytesRead *int64, host_ip string) error {
 	ovaReader := tar.NewReader(ovaFile)
 	for {
 		fileHdr, err := ovaReader.Next()
@@ -342,7 +345,7 @@ func findAndUploadDiskFromOva(ovaFile io.Reader, diskName string, ovfFileItem ty
 			return err
 		}
 		if fileHdr.Name == diskName {
-			err = upload(context.Background(), ovfFileItem, ovaReader, deviceObj.Url, ovfFileItem.Size, currBytesRead)
+			err = upload(context.Background(), ovfFileItem, ovaReader, deviceObj.Url, ovfFileItem.Size, currBytesRead, host_ip)
 			if err != nil {
 				return fmt.Errorf("error while uploading the file %s %s", diskName, err)
 			}

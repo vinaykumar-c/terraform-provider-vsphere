@@ -221,7 +221,7 @@ func schemaVirtualMachineConfigSpec() map[string]*schema.Schema {
 			Description: "The size of the virtual machine's memory, in MB.",
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				if len(d.Get("ovf_deploy").([]interface{})) > 0 {
-					return true
+					return false
 				}
 				return false
 			},

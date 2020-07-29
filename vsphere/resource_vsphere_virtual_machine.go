@@ -106,6 +106,12 @@ func resourceVSphereVirtualMachine() *schema.Resource {
 			Computed:    true,
 			Description: "The ID of an optional host system to pin the virtual machine to.",
 		},
+		"host_ip": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "localhost",
+			Description: "The IP of an optional host system to pin the virtual machine to.",
+		},
 		"wait_for_guest_ip_timeout": {
 			Type:        schema.TypeInt,
 			Optional:    true,
@@ -245,7 +251,7 @@ func resourceVSphereVirtualMachine() *schema.Resource {
 			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				//no network_interface diff for ovf template deployment
 				if len(d.Get("ovf_deploy").([]interface{})) > 0 {
-					return true
+					return false
 				}
 				return false
 			},
@@ -714,7 +720,6 @@ func resourceVSphereVirtualMachineUpdate(d *schema.ResourceData, meta interface{
 
 		// Start goroutine here that checks for questions
 		gChan := make(chan bool)
-
 		questions := map[string]string{
 			"msg.cdromdisconnect.locked": "0",
 		}
@@ -729,7 +734,9 @@ func resourceVSphereVirtualMachineUpdate(d *schema.ResourceData, meta interface{
 					// We're done
 					break
 				default:
+				    log.Printf("[DEBUG] Trying to fetch the properties")
 					vprops, err := virtualmachine.Properties(vm)
+					log.Printf("[DEBUG] Fetching is done")
 					if err != nil {
 						log.Printf("[DEBUG] Error while retrieving VM properties. Error: %s", err)
 						continue
@@ -1431,7 +1438,8 @@ func resourceVsphereMachineDeployOvfAndOva(d *schema.ResourceData, meta interfac
 	}
 
 	log.Print(" [DEBUG] start deploying from ovf/ova Template")
-	err = ovfdeploy.DeployOvfAndGetResult(ovfCreateImportSpecResult, poolObj, folderObj, hostObj, filePath, deployOva, fromLocal, allowUnverifiedSSL)
+	host_ip := d.Get("host_ip").(string)
+	err = ovfdeploy.DeployOvfAndGetResult(ovfCreateImportSpecResult, poolObj, folderObj, hostObj, filePath, deployOva, fromLocal, allowUnverifiedSSL, host_ip)
 	if err != nil {
 		return nil, fmt.Errorf("error while importing ovf/ova template, %s", err)
 	}
@@ -1471,6 +1479,54 @@ func resourceVsphereMachineDeployOvfAndOva(d *schema.ResourceData, meta interfac
 		if err != nil {
 			return nil, fmt.Errorf("error while applying vapp config %s", err)
 		}
+	}
+	// Before starting or proceeding any further, we need to normalize the
+	// configuration of the newly cloned VM. This is basically a subset of update
+	// with the stipulation that there is currently no state to help move this
+	// along.
+	cfgSpec, err := expandVirtualMachineConfigSpec(d, client)
+	if err != nil {
+		return nil, resourceVSphereVirtualMachineRollbackCreate(
+			d,
+			meta,
+			vm,
+			fmt.Errorf("error in virtual machine configuration: %s", err),
+		)
+	}
+
+	// To apply device changes, we need the current devicecfgSpec from the config
+	// info. We then filter this list through the same apply process we did for
+	// create, which will apply the changes in an incremental fashion.
+	devices := object.VirtualDeviceList(vprops.Config.Hardware.Device)
+	var delta []types.BaseVirtualDeviceConfigSpec
+	// Network devices
+	devices, delta, err = virtualdevice.NetworkInterfacePostCloneOperation(d, client, devices)
+	if err != nil {
+		return nil, resourceVSphereVirtualMachineRollbackCreate(
+			d,
+			meta,
+			vm,
+			fmt.Errorf("error processing network device changes post-clone: %s", err),
+		)
+	}
+	cfgSpec.DeviceChange = virtualdevice.AppendDeviceChangeSpec(cfgSpec.DeviceChange, delta...)
+
+	log.Printf("[DEBUG] %s: Final device list: %s", resourceVSphereVirtualMachineIDString(d), virtualdevice.DeviceListString(devices))
+	log.Printf("[DEBUG] %s: Final device change cfgSpec: %s", resourceVSphereVirtualMachineIDString(d), virtualdevice.DeviceChangeString(cfgSpec.DeviceChange))
+
+	// Perform updates
+	if _, ok := d.GetOk("datastore_cluster_id"); ok {
+		err = resourceVSphereVirtualMachineUpdateReconfigureWithSDRS(d, meta, vm, cfgSpec)
+	} else {
+		err = virtualmachine.Reconfigure(vm, cfgSpec)
+	}
+	if err != nil {
+		return nil, resourceVSphereVirtualMachineRollbackCreate(
+			d,
+			meta,
+			vm,
+			fmt.Errorf("error reconfiguring virtual machine: %s", err),
+		)
 	}
 	// Start the virtual machine
 	if err := virtualmachine.PowerOn(vm, pTimeout); err != nil {

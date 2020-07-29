@@ -2,11 +2,13 @@ package vsphere
 
 import (
 	"fmt"
-
+    "log"
 	"context"
-
+    "github.com/vmware/govmomi/find"
+    "github.com/hashicorp/terraform-provider-vsphere/vsphere/internal/helper/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-provider-vsphere/vsphere/internal/helper/structure"
+	"github.com/vmware/govmomi/object"
 )
 
 func resourceVSphereHostPortGroup() *schema.Resource {
@@ -14,6 +16,12 @@ func resourceVSphereHostPortGroup() *schema.Resource {
 		"host_system_id": {
 			Type:        schema.TypeString,
 			Description: "The managed object ID of the host to set the virtual switch up on.",
+			Required:    true,
+			ForceNew:    true,
+		},
+		"datacenter_id": {
+			Type:        schema.TypeString,
+			Description: "The managed object ID of the datacenter to set the virtual switch up on.",
 			Required:    true,
 			ForceNew:    true,
 		},
@@ -74,10 +82,12 @@ func resourceVSphereHostPortGroupCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVSphereHostPortGroupRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*VSphereClient).vimClient
-	hsID, name, err := portGroupIDsFromResourceID(d)
-	if err != nil {
-		return err
-	}
+	name := d.Get("name").(string)
+	hsID := d.Get("host_system_id").(string)
+	//hsID, name, err := portGroupIDsFromResourceID(d)
+	//if err != nil {
+	//	return err
+	//}
 	ns, err := hostNetworkSystemFromHostSystemID(client, hsID)
 	if err != nil {
 		return fmt.Errorf("error loading host network system: %s", err)
@@ -93,6 +103,32 @@ func resourceVSphereHostPortGroupRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	d.Set("key", pg.Key)
+
+	var dc *object.Datacenter
+	if dcID, ok := d.GetOk("datacenter_id"); ok {
+		var err error
+		dc, err = datacenterFromID(client, dcID.(string))
+		if err != nil {
+			return fmt.Errorf("cannot locate datacenter: %s", err)
+		}
+	}
+
+	finder := find.NewFinder(client.Client, false)
+	if dc != nil {
+		finder.SetDatacenter(dc)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), provider.DefaultAPITimeout)
+	defer cancel()
+	networks, err := finder.NetworkList(ctx, name)
+	if err != nil {
+		return err
+	}
+	if len(networks) == 0 {
+		return fmt.Errorf("%s %s not found", "Network", name)
+	}
+
+    d.SetId(networks[0].Reference().Value)
+	log.Printf("[DEBUG] Network ID is %s", networks[0].Reference().Value)
 	cpm, err := calculateComputedPolicy(pg.ComputedPolicy)
 	if err != nil {
 		return err
@@ -108,11 +144,14 @@ func resourceVSphereHostPortGroupRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceVSphereHostPortGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	name := d.Get("name").(string)
+	hsID := d.Get("host_system_id").(string)
+	//saveHostPortGroupID(d, hsID, name)
 	client := meta.(*VSphereClient).vimClient
-	hsID, name, err := portGroupIDsFromResourceID(d)
-	if err != nil {
-		return err
-	}
+	//hsID, name, err := portGroupIDsFromResourceID(d)
+	//if err != nil {
+	//	return err
+	//}
 	ns, err := hostNetworkSystemFromHostSystemID(client, hsID)
 	if err != nil {
 		return fmt.Errorf("error loading host network system: %s", err)
@@ -129,11 +168,14 @@ func resourceVSphereHostPortGroupUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceVSphereHostPortGroupDelete(d *schema.ResourceData, meta interface{}) error {
+	name := d.Get("name").(string)
+	hsID := d.Get("host_system_id").(string)
+	//saveHostPortGroupID(d, hsID, name)
 	client := meta.(*VSphereClient).vimClient
-	hsID, name, err := portGroupIDsFromResourceID(d)
-	if err != nil {
-		return err
-	}
+	//hsID, name, err := portGroupIDsFromResourceID(d)
+	//if err != nil {
+	//	return err
+	//}
 	ns, err := hostNetworkSystemFromHostSystemID(client, hsID)
 	if err != nil {
 		return fmt.Errorf("error loading host network system: %s", err)

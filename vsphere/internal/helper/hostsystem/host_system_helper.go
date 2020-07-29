@@ -27,10 +27,6 @@ func SystemOrDefault(client *govmomi.Client, name string, dc *object.Datacenter)
 	t := client.ServiceContent.About.ApiType
 	switch t {
 	case "HostAgent":
-		if name != "" {
-		    log.Printf("[Vinay] Host system name: %s", t)
-			return finder.HostSystem(ctx, name)
-		}
 		return finder.DefaultHostSystem(ctx)
 	case "VirtualCenter":
 		if name != "" {

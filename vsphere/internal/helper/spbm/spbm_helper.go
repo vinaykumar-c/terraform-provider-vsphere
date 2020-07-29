@@ -2,7 +2,6 @@ package spbm
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-provider-vsphere/vsphere/internal/helper/provider"
@@ -73,56 +72,28 @@ func PolicySpecByID(id string) []types.BaseVirtualMachineProfileSpec {
 
 // PolicyIDByVirtualDisk fetches the storage policy associated with a virtual disk.
 func PolicyIDByVirtualDisk(client *govmomi.Client, vmMOID string, diskKey int) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), provider.DefaultAPITimeout)
-	defer cancel()
-	pc, err := pbmClientFromGovmomiClient(ctx, client)
-	if err != nil {
-		return "", provider.ProviderError(vmMOID, "PolicyIDByVirtualDisk", err)
-	}
-
-	pbmSOR := pbmtypes.PbmServerObjectRef{
-		ObjectType: "virtualDiskId",
-		Key:        fmt.Sprintf("%s:%d", vmMOID, diskKey),
-	}
-
-	policies, err := queryAssociatedProfile(ctx, pc, pbmSOR)
-	if err != nil {
-		return "", provider.ProviderError(vmMOID, "PolicyIDByVirtualDisk", err)
-	}
-
-	// If no policy returned then virtual disk is not associated with a policy
-	if policies == nil || len(policies) == 0 {
+	log.Printf("[DEBUG] PolicyIDByVirtualDisk vmMOID is %s.", vmMOID)
+	t := client.ServiceContent.About.ApiType
+	switch t {
+	case "HostAgent":
 		return "", nil
-	}
-
-	return policies[0].UniqueId, nil
+	case "VirtualCenter":
+        return "", nil
+    }
+    return "", nil
 }
 
 // PolicyIDByVirtualMachine fetches the storage policy associated with a virtual machine.
 func PolicyIDByVirtualMachine(client *govmomi.Client, vmMOID string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), provider.DefaultAPITimeout)
-	defer cancel()
-	pc, err := pbmClientFromGovmomiClient(ctx, client)
-	if err != nil {
-		return "", provider.ProviderError(vmMOID, "PolicyIDByVirtualMachine", err)
-	}
-
-	pbmSOR := pbmtypes.PbmServerObjectRef{
-		ObjectType: "virtualMachine",
-		Key:        vmMOID,
-	}
-
-	policies, err := queryAssociatedProfile(ctx, pc, pbmSOR)
-	if err != nil {
-		return "", provider.ProviderError(vmMOID, "PolicyIDByVirtualMachine", err)
-	}
-
-	// If no policy returned then VM is not associated with a policy
-	if policies == nil || len(policies) == 0 {
+	log.Printf("[DEBUG] PolicyIDByVirtualMachine vmMOID is %s.", vmMOID)
+	t := client.ServiceContent.About.ApiType
+	switch t {
+	case "HostAgent":
 		return "", nil
-	}
-
-	return policies[0].UniqueId, nil
+	case "VirtualCenter":
+        return "", nil
+    }
+    return "", nil
 }
 
 // queryAssociatedProfile returns the PbmProfileId of the storage policy associated with entity.

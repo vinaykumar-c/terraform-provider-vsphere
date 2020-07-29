@@ -318,9 +318,6 @@ func expandResourcePoolMemoryAllocation(d *schema.ResourceData) types.ResourceAl
 
 func resourceVSphereResourcePoolClient(meta interface{}) (*govmomi.Client, error) {
 	client := meta.(*VSphereClient).vimClient
-	if err := viapi.ValidateVirtualCenter(client); err != nil {
-		return nil, err
-	}
 	return client, nil
 }
 
