@@ -582,9 +582,22 @@ func resourceVSphereVirtualMachineRead(d *schema.ResourceData, meta interface{})
 	// Finally, select a valid IP address for use by the VM for purposes of
 	// provisioning. This also populates some computed values to present to the
 	// user.
-	if vprops.Guest != nil {
-		if err := buildAndSelectGuestIPs(d, *vprops.Guest); err != nil {
-			return fmt.Errorf("error reading virtual machine guest data: %s", err)
+	var count int = 5
+	for i := 0; i < count; i +=1 {
+	    vprops1, err := virtualmachine.Properties(vm)
+	    if err != nil {
+		    return fmt.Errorf("error fetching VM properties: %s", err)
+	    }
+	    if vprops1.Guest != nil {
+	        guest_ip_addr, err := buildAndSelectGuestIPs(d, *vprops1.Guest)
+	        if err != nil {
+			    return fmt.Errorf("error reading virtual machine guest data: %s", err)
+			}
+			if len(guest_ip_addr) > 0 {
+			    log.Printf("[DEBUG] %s: Read complete", resourceVSphereVirtualMachineIDString(d))
+	            return nil
+	        }
+	        time.Sleep(10 * time.Second)
 		}
 	}
 
